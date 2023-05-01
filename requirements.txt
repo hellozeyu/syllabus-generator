@@ -1,0 +1,4 @@
+shiny~=0.3.3
+docxtpl~=0.16.6
+shinyswatch~=0.2.3
+docx2pdf~=0.1.8
