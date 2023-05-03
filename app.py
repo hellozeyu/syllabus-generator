@@ -3,6 +3,7 @@ from docxtpl import DocxTemplate
 from docx2pdf import convert
 from pathlib import Path
 import shinyswatch
+import os
 
 
 app_ui = ui.page_navbar(
@@ -42,9 +43,13 @@ app_ui = ui.page_navbar(
                 ui.input_text_area("readings", "Readings", placeholder="Enter text"),
 
                 ui.input_text_area("assignments", "Assignments and Assessments", placeholder="Enter text"),
+
+                ui.tags.h2('Syllabus Details'),
+                ui.tags.hr(),
+                ui.input_text("file_name", "File Name", placeholder="Syllabus_AppliedCoding4Risk"),
                 ui.row(
-                    ui.p(ui.input_action_button("generate", "Generate", class_="btn-primary")),
-                    # ui.output_text_verbatim("txt"),
+                    ui.download_button("download_syllabus", "Download Syllabus"),
+                    # ui.p(ui.input_action_button("generate", "Generate", class_="btn-primary")),
                 ),
                 width=3
             ),
@@ -62,11 +67,8 @@ app_ui = ui.page_navbar(
 
 
 def server(input, output, session):
-    @output
-    @render.text
-    @reactive.event(input.generate)
-    def preview():
-        print('Clicked')
+    @session.download()
+    def download_syllabus():
         doc = DocxTemplate("templates/syllabus_template.docx")
 
         context = {'program_name': input.program_name(),
@@ -84,11 +86,16 @@ def server(input, output, session):
                    'readings': input.readings(),
                    'assignments': input.assignments()}
 
-        doc.render(context)
-        doc.save("generated_syllabus.docx")
-        convert("generated_syllabus.docx", "www/generated_syllabus.pdf")
+        file_name = input.file_name() if input.file_name() else "syllabus"
 
-        return '<iframe style="height:1000px; width:100%" src="generated_syllabus.pdf"></iframe>'
+        doc.render(context)
+
+        path = f"{file_name}.docx"
+        doc.save(path)
+        return path
+        # convert("generated_syllabus.docx", "www/generated_syllabus.pdf")
+
+        # return '<iframe style="height:1000px; width:100%" src="generated_syllabus.pdf"></iframe>'
 
 
 www_dir = Path(__file__).parent / "www"
